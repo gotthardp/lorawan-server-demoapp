@@ -1,0 +1,13 @@
+%
+% Copyright (c) 2016-2017 Petr Gotthard <petr.gotthard@centrum.cz>
+% All rights reserved.
+% Distributed under the terms of the MIT License. See the LICENSE file.
+%
+{application, lorawan_demoapp,
+    [{description, "LoRaWAN Demo Application"},
+    {vsn, "0.1.0"},
+    {modules, []},
+    {env, []},
+    {applications, [lorawan_server]}]}.
+
+% end of file
