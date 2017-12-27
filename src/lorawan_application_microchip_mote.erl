@@ -9,28 +9,35 @@
 -module(lorawan_application_microchip_mote).
 -behaviour(lorawan_application).
 
--export([init/1, handle_join/3, handle_rx/4]).
+-export([init/1, handle_join/3, handle_uplink/4, handle_rxq/4]).
 
+-include_lib("lorawan_server/include/lorawan.hrl").
 -include_lib("lorawan_server/include/lorawan_db.hrl").
 
 init(_App) ->
     ok.
 
-handle_join(_Gateway, _Device, _Link) ->
+handle_join({_Network, _Profile, _Device}, {_MAC, _RxQ}, _DevAddr) ->
     % accept any device
     ok.
 
+handle_uplink({_Network, _Profile, _Node}, _RxQ, {lost, _State}, _Frame) ->
+    retransmit;
+handle_uplink(_Context, _RxQ, _LastAcked, _Frame) ->
+    % accept and wait for deduplication
+    {ok, []}.
+
 % the data structure is explained in
 % Lora_Legacy_Mote_Firmware/Includes/Board/MOTEapp.c:520
-handle_rx(_Gateway, #node{devaddr=DevAddr},
-        #rxdata{data= <<Light:5/binary, Temp:3/binary>>}, _RxQ) ->
+handle_rxq({_Network, _Profile, #node{devaddr=DevAddr}}, _Gateways,
+        #frame{data= <<Light:5/binary, Temp:3/binary>>}, []) ->
     lager:debug("PUSH_DATA ~w ~p ~p", [DevAddr, Light, Temp]),
     % display actual time
     {H, M, S} = time(),
     Time = lists:flatten(io_lib:format('~2..0b:~2..0b:~2..0b', [H, M, S])),
     {send, #txdata{port=2, data=list_to_binary(Time)}};
 
-handle_rx(_Gateway, _Link, RxData, _RxQ) ->
-    {error, {unexpected_data, RxData}}.
+handle_rxq(_Context, _Gateways, Frame, _State) ->
+    {error, {unexpected_data, Frame}}.
 
 % end of file
