@@ -9,7 +9,7 @@
 -module(lorawan_application_microchip_mote).
 -behaviour(lorawan_application).
 
--export([init/1, handle_join/3, handle_uplink/4, handle_rxq/5]).
+-export([init/1, handle_join/3, handle_uplink/4, handle_rxq/5, handle_delivery/3]).
 
 -include_lib("lorawan_server/include/lorawan.hrl").
 -include_lib("lorawan_server/include/lorawan_db.hrl").
@@ -39,5 +39,8 @@ handle_rxq({_Network, _Profile, #node{devaddr=DevAddr}}, _Gateways, _WillReply,
 
 handle_rxq(_Context, _Gateways, _WillReply, Frame, _State) ->
     {error, {unexpected_data, Frame}}.
+
+handle_delivery({_Network, _Profile, _Node}, _Result, _Receipt) ->
+    ok.
 
 % end of file
