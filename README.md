@@ -9,11 +9,11 @@ several benefits:
  - Smaller infrastructure as there is only one server, which is easier to secure and maintain
  - Ability to send downlinks in the RX1 window, which reduces the device power consumption
  - Lower development effort as internal applications can reuse the internal web-server and database
- 
-## Build Instructions
 
 To develop internal applications you have to
-[Learn You Some Erlang](http://learnyousomeerlang.com/introduction).
+[Learn You Some Erlang](http://learnyousomeerlang.com/introduction) first.
+
+## Build Instructions
 
 Build the application by:
 ```bash
