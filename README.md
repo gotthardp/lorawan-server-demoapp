@@ -28,6 +28,9 @@ Then start:
 _build/default/rel/lorawan-server-demoapp/bin/lorawan-server-demoapp
 ```
 
+And access the extended web-admin via http://localhost:8080/demo
+
+
 ## Getting Help
 
 To ask server and LoRa related questions please join the

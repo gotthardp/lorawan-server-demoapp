@@ -14,8 +14,23 @@
 -include_lib("lorawan_server/include/lorawan.hrl").
 -include_lib("lorawan_server/include/lorawan_db.hrl").
 
+-record(mote, {devaddr, light, temp}).
+
 init(_App) ->
-    ok.
+    % setup database
+    lists:foreach(fun({Name, TabDef}) -> lorawan_db:ensure_table(Name, TabDef) end, [
+        {motes, [
+            {record_name, mote},
+            {attributes, record_info(fields, mote)},
+            {disc_copies, [node()]}]}
+        ]),
+    % setup web-admin
+    {ok, [{shepherd, [
+        {"/api/motes/[:devaddr]", lorawan_admin_db_record,
+            [motes, mote, record_info(fields, mote), lorawan_admin]},
+        {"/demo", cowboy_static, {priv_file, lorawan_demoapp, "demo/index.html"}},
+        {"/demo/[...]", cowboy_static, {priv_dir, lorawan_demoapp, "demo"}}
+    ]}]}.
 
 handle_join({_Network, _Profile, _Device}, {_MAC, _RxQ}, _DevAddr) ->
     % accept any device
@@ -32,6 +47,8 @@ handle_uplink(_Context, _RxQ, _LastAcked, _Frame) ->
 handle_rxq({_Network, _Profile, #node{devaddr=DevAddr}}, _Gateways, _WillReply,
         #frame{data= <<Light:5/binary, Temp:3/binary>>}, []) ->
     lager:debug("PUSH_DATA ~w ~p ~p", [DevAddr, Light, Temp]),
+    % store the most recent value
+    ok = mnesia:dirty_write(motes, #mote{devaddr=DevAddr, light=Light, temp=Temp}),
     % display actual time
     {H, M, S} = time(),
     Time = lists:flatten(io_lib:format('~2..0b:~2..0b:~2..0b', [H, M, S])),
