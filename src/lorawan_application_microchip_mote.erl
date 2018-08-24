@@ -69,7 +69,7 @@ handle_rxq({_Network, _Profile, #node{devaddr=DevAddr}}, _Gateways, _WillReply,
         #frame{data= <<Light:5/binary, Temp:3/binary>>}, []) ->
     lager:debug("PUSH_DATA ~w ~p ~p", [DevAddr, Light, Temp]),
     % store the most recent value
-    ok = mnesia:dirty_write(motes, #mote{devaddr=DevAddr, light=Light, temp=Temp}),
+    ok = mnesia:dirty_write(#mote{devaddr=DevAddr, light=Light, temp=Temp}),
     % downlink actual time back to the device
     {H, M, S} = time(),
     Time = lists:flatten(io_lib:format('~2..0b:~2..0b:~2..0b', [H, M, S])),
